@@ -26,6 +26,7 @@ export default function Line({
     return <motion.div
         className={classnames("line", id)}
         id={variant}
+        role="text"
         initial="initial"
         animate="animate"
         exit="exit"
