@@ -39,5 +39,12 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "classnames": "^2.3.1",
+    "framer-motion": "^6.5.1",
+    "react-helmet": "^6.1.0",
+    "react-icons": "^4.4.0",
+    "sass": "^1.54.0"
   }
 }

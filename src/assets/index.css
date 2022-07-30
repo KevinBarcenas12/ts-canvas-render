@@ -1,0 +1,122 @@
+body {
+  margin: 0;
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    'Roboto',
+    'Oxygen',
+    'Ubuntu',
+    'Cantarell',
+    'Fira Sans',
+    'Droid Sans',
+    'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  background: var(--clr-bg-super);
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: break-word;
+}
+
+input,
+button,
+a {
+  text-decoration: none;
+  outline: none;
+  border: none;
+  appearance: none;
+}
+
+#root {
+  isolation: isolate;
+  min-height: 100%;
+  color: var(--clr-font-main);
+  background-color: var(--clr-root);
+}
+
+*,
+*::after,
+*::before {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  transition:
+    color 250ms ease,
+    background 250ms ease;
+}
+
+::-webkit-scrollbar {
+  width: .25rem;
+  height: .25rem;
+  background-color: hsl(var(--hsl-bg-alt) / .125);
+}
+
+::-webkit-scrollbar-thumb {
+  width: .24rem;
+  border-radius: .12rem;
+  background-color: hsl(var(--hsl-bg-alt) / .5);
+}
+
+:root {
+  --hsl-bg-main: 240 100% 97%;
+  --hsl-bg-alt: 0 0% 7%;
+  --hsl-bg-super: 0 100% 100%;
+
+  --hsl-font-main: 0 0% 7%;
+  --hsl-font-alt: 220 100% 35%;
+
+  --hsl-hl: 230 100% 85%;
+  --hsl-track: 220 100% 75%;
+  --hsl-track-disabled: 0 0% 50%;
+
+  --clr-bg-main: hsl(var(--hsl-bg-main) / 1);
+  --clr-bg-alt: hsl(var(--hsl-bg-alt) / 1);
+  --clr-bg-super: hsl(var(--clr-bg-super) / 1);
+
+  --clr-font-main: hsl(var(--hsl-font-main) / 1);
+  --clr-font-alt: hsl(var(--hsl-font-alt) / 1);
+
+  --clr-root: hsl(var(--hsl-hl) / 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --hsl-bg-main: 0 0% 7%;
+    --hsl-bg-alt: 240 100% 97%;
+    --hsl-bg-super: 0 0% 0%;
+
+    --hsl-font-alt: 190 100% 75%;
+    --hsl-font-main: 0 0% 100%;
+
+    --hsl-hl: 230 100% 15%;
+  }
+}

@@ -1,0 +1,28 @@
+.input {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: .5rem;
+    font-size: 1.5em;
+
+    @include Mixins.mobile {
+        font-size: 1.25em;
+    }
+
+    label {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+        border: .125rem dashed currentColor;
+        border-radius: 1rem;
+    }
+
+    .show-button {
+        color: var(--clr-font-alt);
+        cursor: pointer;
+    }
+}

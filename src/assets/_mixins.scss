@@ -1,0 +1,23 @@
+@mixin screen-width($size: 360px) {
+    @media (min-width: $size) {
+        @content;
+    }
+}
+
+@mixin screen-height($size: 480px) {
+    @media (min-height: $size) {
+        @content;
+    }
+}
+
+@mixin mobile {
+    @media (hover: none) {
+        @content;
+    }
+}
+
+@mixin mobile-oriented($direction: portrait) {
+    @media (hover: none) and (orientation: $direction) {
+        @content;
+    }
+}

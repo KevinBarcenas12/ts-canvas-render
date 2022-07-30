@@ -1,26 +1,29 @@
+import Frame from 'components/animated/frame';
+import Input from 'components/input';
+import Player from 'components/player';
+import { FilesProvider, PlayerVisibleProvider } from 'context';
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+
+import "./assets/index.css";
+import "./assets/main.scss";
+
+function Layout() {
+  return <React.Fragment>
+    <Frame animationDirection="y" variant="main-container">
+      <Input />
+      <Player />
+    </Frame>
+  </React.Fragment>
+}
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+  return <React.Fragment>
+    <FilesProvider>
+      <PlayerVisibleProvider>
+        <Layout />
+      </PlayerVisibleProvider>
+    </FilesProvider>
+  </React.Fragment>
 }
 
 export default App;

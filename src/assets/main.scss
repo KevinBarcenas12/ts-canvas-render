@@ -1,0 +1,13 @@
+@use "./mixins" as Mixins;
+
+@import "./media.scss";
+
+@import "./components/animated.scss";
+@import "./components/video.scss";
+@import "./components/input.scss";
+
+
+.expandable__container#video-info {
+    display: flex;
+    flex-direction: column;
+}

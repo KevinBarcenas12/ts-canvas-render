@@ -1,0 +1,225 @@
+@use "../mixins" as Mixins;
+
+.video {
+    --padding: 1.5rem;
+    @include Mixins.mobile {
+        --padding: .5rem;
+    }
+    padding: var(--padding);
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--padding) / 2);
+
+    &__player {
+        position: relative;
+        overflow: hidden;
+        color: white;
+        display: grid;
+        place-items: center;
+        --max: 50vh;
+        &:fullscreen {
+            --max: 100vh;
+            @include Mixins.mobile-oriented(landscape) {
+                --max: 100vh;
+            }
+        }
+        @include Mixins.mobile {
+            --max: 80vh;
+        }
+
+        canvas {
+            width: calc(var(--max) * var(--width) / var(--height));
+            margin-inline: auto;
+            max-height: var(--max);
+        }
+
+        &:fullscreen canvas {
+            max-height: 100vh;
+            max-width: 100vw;
+        }
+    }
+    &__controls {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        user-select: none;
+        --size: min(1rem, 4vw);
+
+        .media-control {
+            filter: drop-shadow(.1rem .1rem .2rem hsl(var(--hsl-bg-alt) / .25));
+            position: absolute;
+            font-size: calc(var(--size) * 1.5);
+            border-radius: calc(var(--size) * .5);
+            padding: calc(var(--size) * .05);
+            z-index: 2;
+
+            &:hover {
+                background-color: hsl(0 100% 100% / .125);
+            }
+
+            .icon { display: block; }
+            .track {
+                position: relative;
+                display: block;
+                margin-inline: calc(var(--size) * .5);
+                flex-grow: 1;
+                flex-shrink: 0;
+                min-width: calc(var(--size) * 3);
+                cursor: pointer;
+
+                .track__progress {
+                    position: absolute;
+                    left: 0;
+                    width: calc((var(--width, 0) * 1%));
+                    height: calc(var(--size) * .5);
+                    top: calc(var(--size) * .5); 
+                    background-color: var(--clr-root);
+                    border-radius: calc(var(--size) * .5);
+                    z-index: 2;
+                    // transition: width 400ms ease;
+                }
+                .track__total {
+                    position: absolute;
+                    left: 0;
+                    width: 100%;
+                    height: calc(var(--size) * .5);
+                    top: calc(var(--size) * .5);
+                    background-color: hsl(var(--hsl-bg-alt) / .25);
+                    border-radius: calc(var(--size) * .5);
+                    transition: width 400ms ease;
+                    z-index: 1;
+                }
+                .track__input {
+                    background-color: transparent;
+                    color: transparent;
+                    height: 100%;
+                    width: calc(100% + (var(--size) / 2));
+                    position: absolute;
+                    left: calc(var(--size) / 3 * -1);
+                    z-index: 3;
+                    cursor: pointer;
+
+                    &::-webkit-slider-thumb {
+                        -webkit-appearance: none;
+                        appearance: none;
+                        aspect-ratio: 1/1;
+                        height: calc(var(--size) * .9);
+                        top: calc(50% - (var(--size) / 2));
+                        border-radius: 50%;
+                        transform: scale(.86);
+                        cursor: pointer;
+                        background-color: var(--clr-root);
+                        transition: transform .2s ease-in-out, background-color .2s ease-in-out;
+                    }
+                }
+            }
+        }
+
+        [role="slider"] {
+            display: flex;
+            flex-direction: row;
+            font-size: calc(var(--size) * 1.25);
+            cursor: default;
+            filter: drop-shadow(.1rem .1rem .2rem hsl(var(--hsl-bg-alt) / .125));
+        }
+        [role="toggler"] {
+            display: inline;
+            cursor: pointer;
+            aspect-ratio: 1/1;
+        }
+        [role="text"] {
+            display: block;
+        }
+
+        #playpause {
+            bottom: calc(var(--size) * .5);
+            left: calc(var(--size) * .5);
+        }
+        #exit {
+            top: calc(var(--size) * .5);
+            right: calc(var(--size) * .5);
+        }
+        #fullscreen {
+            bottom: calc(var(--size) * .5);
+            right: calc(var(--size) * .5);
+        }
+        #volume {
+            bottom: calc(var(--size) * .5);
+            left: calc(var(--size) * 2.5);
+            position: absolute;
+            // background-color: red;
+            display: flex;
+            flex-wrap: nowrap;
+            flex-direction: row;
+            width: calc(var(--size) * 1.5);
+            height: calc(var(--size) * 1.5 + (var(--size) * .1));
+            transition: width 300ms ease-in-out;
+            overflow-x: hidden;
+
+            &:hover {
+                width: calc(var(--size) * 9);
+            }
+
+            #volume__toggler {
+                display: block;
+                position: relative;
+                height: calc(var(--size) * 1.5);
+                width: calc(var(--size) * 1.5);
+                &:hover {
+                    background-color: transparent;
+                }
+            }
+            .track {
+                width: calc(var(--size) * 6.5);
+            }
+        }
+        #timebar {
+            bottom: calc(var(--size) * 2.5);
+            width: calc(100% - var(--size));
+            left: calc(var(--size) * .5);
+
+            .timestamp {
+                width: calc(var(--size) * 3);
+                font-size: var(--size);
+                display: grid;
+                place-content: center;
+                height: calc(var(--size) * 1.5);
+            }
+        }
+        .prevent-controls-missclick {
+            position: absolute;
+            z-index: 1;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: calc(var(--size) * 4);
+        }
+        .click-handler {
+            position: absolute;
+            width: calc(100% / 2.5);
+            height: 100%;
+            top: 0;
+            &.left {
+                left: 0;
+            }
+            &.right {
+                right: 0;
+            }
+        }
+        #left-time,
+        #right-time {
+            top: calc(50% - (var(--size)));
+            height: var(--size);
+            font-size: var(--size);
+            filter: drop-shadow(.1rem .1rem .1rem hsl(var(--hsl-bg-alt) / .25));
+        }
+        #left-time {
+            left: 20%;
+        }
+        #right-time {
+            right: 20%;
+        }
+    }
+}
