@@ -1,13 +1,103 @@
 @use "./mixins" as Mixins;
-
 @import "./media.scss";
+
+:root {
+    --padding: min(1rem, 3vw);
+    --current: var(--hsl-track);
+    --max: 50dvh;
+    --size: min(1rem, 4vw);
+    --fsize: min(1em, 2vw);
+    --video-padding: var(--padding);
+    @include Mixins.mobile {
+        --padding: min(.5rem, 2vw);
+        --fsize: min(1.75em, 3.65vw);
+        --size: min(1.5em, 2vw);
+        @include Mixins.screen-width(540px) {
+            --fsize: min(1.25em, 2vw) !important;
+        }
+    }
+    @include Mixins.mobile-oriented(landscape) {
+        --fsize: min(.65em, 1.5vw);
+    }
+    @include Mixins.mobile-oriented(portrait) {
+        --size: min(2em, 4vw);
+        --video-padding: 0;
+    }
+}
 
 @import "./components/animated.scss";
 @import "./components/video.scss";
 @import "./components/input.scss";
 
-
 .expandable__container#video-info {
     display: flex;
     flex-direction: column;
+}
+.expandable__container#file-list {
+    display: flex;
+    flex-direction: column;
+    gap: .5em;
+}
+// .expandable#info {
+//     @include Mixins.mobile-oriented(portrait) {
+//         min-height: 4.5em;
+//     }
+// }
+.expandable#list {
+    max-height: 25.65em;
+    .expandable__container {
+        max-height: unset;
+    }
+}
+.expandable#list.open {
+    min-height: 11em;
+}
+
+.video__player {
+    @include Mixins.mobile-oriented(portrait) {
+        position: sticky;
+        top: 0;
+    }
+}
+
+.video-entry {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-items: center;
+    padding: .125em;
+    gap: .25em;
+    .thumbnail {
+        height: 6em;
+        @include Mixins.mobile-oriented(landscape) { height: 4em; }
+        width: auto;
+    }
+    .information {
+        display: flex;
+        flex-grow: 1;
+        flex-direction: column;
+        padding-left: .5em;
+        gap: .25em;
+        overflow-x: hidden;
+    }
+    .current-selection {
+        width: 3em;
+        .icon {
+            width: 2em;
+            height: 2em;
+        }
+    }
+}
+
+.mark {
+    color: lightblue;
+}
+
+.truncate {
+    word-wrap: keep-all;
+    line-break: normal;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    position: relative;
 }

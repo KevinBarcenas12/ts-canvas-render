@@ -2,28 +2,28 @@ import Frame from 'components/animated/frame';
 import Input from 'components/input';
 import Player from 'components/player';
 import { FilesProvider, PlayerVisibleProvider } from 'context';
-import React from 'react';
+import { Fragment } from 'react';
 
 import "./assets/index.css";
 import "./assets/main.scss";
 
 function Layout() {
-  return <React.Fragment>
+  return <Fragment>
     <Frame animationDirection="y" variant="main-container">
       <Input />
       <Player />
     </Frame>
-  </React.Fragment>
+  </Fragment>
 }
 
 function App() {
-  return <React.Fragment>
+  return <Fragment>
     <FilesProvider>
       <PlayerVisibleProvider>
         <Layout />
       </PlayerVisibleProvider>
     </FilesProvider>
-  </React.Fragment>
+  </Fragment>
 }
 
 export default App;

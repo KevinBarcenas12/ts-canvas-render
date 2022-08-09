@@ -1,14 +1,67 @@
 @use "../mixins" as Mixins;
 
-.video {
-    --padding: 1.5rem;
-    @include Mixins.mobile {
-        --padding: .5rem;
+@function getSize($multiplier: 1) {
+    @return calc(var(--size) * $multiplier);
+}
+
+@function getAspectRatio($inverted: false) {
+    @if $inverted {
+        @return calc(var(--videoHeight) / var(--videoWidth));
     }
-    padding: var(--padding);
-    display: flex;
-    flex-direction: column;
-    gap: calc(var(--padding) / 2);
+    @return calc(var(--videoWidth) / var(--videoHeight));
+}
+
+@mixin grid-and-mobile {
+    @include Mixins.screen-width(640px) {
+        @include Mixins.desktop {
+            @content;
+        }
+    }
+    @include Mixins.mobile-oriented(landscape) {
+        @content;
+    }
+}
+
+
+.video {
+    padding: var(--video-padding);
+    font-size: var(--fsize);
+
+    .content-container {
+        display: flex;
+        flex-direction: column;
+        gap: calc(var(--padding));
+        font-size: var(--fsize);
+        // padding: var(--video-padding);
+        .expandable {
+            @include Mixins.mobile-oriented(portrait) {
+                margin-inline: var(--padding);
+                margin-left: var(--padding);
+                margin-right: var(--padding);
+            }
+        }
+
+        @include grid-and-mobile() {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            grid-template-rows: calc((100vw / 3 * 2 - (var(--padding) * 1.5)) * getAspectRatio(true)) 1fr;
+
+            #info {
+                grid-column: 1 / 2;
+            }
+            #list, #list .expandable__container {
+                max-height: calc(100vh - var(--padding) * 2);
+            }
+            .extra-container {
+                grid-column: 2 / 3;
+                grid-row: 1 / 3;
+            }
+
+            .video__player, canvas {
+                height: calc((100vw / 3 * 2 - (var(--padding) * 1.5)) * getAspectRatio(true));
+            }
+        }
+    }
 
     &__player {
         position: relative;
@@ -16,26 +69,30 @@
         color: white;
         display: grid;
         place-items: center;
-        --max: 50vh;
+        flex-shrink: 0;
+        background-color: hsl(0 0% 0% / .055);
+        z-index: 2;
+
+        canvas {
+            width: calc(max(var(--max), 100vw - (var(--padding) * 2)) * getAspectRatio());
+            margin-inline: auto;
+        }
+
+        @include Mixins.mobile-oriented(landscape) {
+            --max: 100vh;
+        }
+
         &:fullscreen {
             --max: 100vh;
-            @include Mixins.mobile-oriented(landscape) {
-                --max: 100vh;
+            canvas {
+                max-height: 100vh;
+                max-width: 100vw;
+                height: unset;
+                width: calc(100vh * getAspectRatio());
             }
         }
         @include Mixins.mobile {
-            --max: 80vh;
-        }
-
-        canvas {
-            width: calc(var(--max) * var(--width) / var(--height));
-            margin-inline: auto;
-            max-height: var(--max);
-        }
-
-        &:fullscreen canvas {
-            max-height: 100vh;
-            max-width: 100vw;
+            --max: 80dvh;
         }
     }
     &__controls {
@@ -45,93 +102,6 @@
         top: 0;
         left: 0;
         user-select: none;
-        --size: min(1rem, 4vw);
-
-        .media-control {
-            filter: drop-shadow(.1rem .1rem .2rem hsl(var(--hsl-bg-alt) / .25));
-            position: absolute;
-            font-size: calc(var(--size) * 1.5);
-            border-radius: calc(var(--size) * .5);
-            padding: calc(var(--size) * .05);
-            z-index: 2;
-
-            &:hover {
-                background-color: hsl(0 100% 100% / .125);
-            }
-
-            .icon { display: block; }
-            .track {
-                position: relative;
-                display: block;
-                margin-inline: calc(var(--size) * .5);
-                flex-grow: 1;
-                flex-shrink: 0;
-                min-width: calc(var(--size) * 3);
-                cursor: pointer;
-
-                .track__progress {
-                    position: absolute;
-                    left: 0;
-                    width: calc((var(--width, 0) * 1%));
-                    height: calc(var(--size) * .5);
-                    top: calc(var(--size) * .5); 
-                    background-color: var(--clr-root);
-                    border-radius: calc(var(--size) * .5);
-                    z-index: 2;
-                    // transition: width 400ms ease;
-                }
-                .track__total {
-                    position: absolute;
-                    left: 0;
-                    width: 100%;
-                    height: calc(var(--size) * .5);
-                    top: calc(var(--size) * .5);
-                    background-color: hsl(var(--hsl-bg-alt) / .25);
-                    border-radius: calc(var(--size) * .5);
-                    transition: width 400ms ease;
-                    z-index: 1;
-                }
-                .track__input {
-                    background-color: transparent;
-                    color: transparent;
-                    height: 100%;
-                    width: calc(100% + (var(--size) / 2));
-                    position: absolute;
-                    left: calc(var(--size) / 3 * -1);
-                    z-index: 3;
-                    cursor: pointer;
-
-                    &::-webkit-slider-thumb {
-                        -webkit-appearance: none;
-                        appearance: none;
-                        aspect-ratio: 1/1;
-                        height: calc(var(--size) * .9);
-                        top: calc(50% - (var(--size) / 2));
-                        border-radius: 50%;
-                        transform: scale(.86);
-                        cursor: pointer;
-                        background-color: var(--clr-root);
-                        transition: transform .2s ease-in-out, background-color .2s ease-in-out;
-                    }
-                }
-            }
-        }
-
-        [role="slider"] {
-            display: flex;
-            flex-direction: row;
-            font-size: calc(var(--size) * 1.25);
-            cursor: default;
-            filter: drop-shadow(.1rem .1rem .2rem hsl(var(--hsl-bg-alt) / .125));
-        }
-        [role="toggler"] {
-            display: inline;
-            cursor: pointer;
-            aspect-ratio: 1/1;
-        }
-        [role="text"] {
-            display: block;
-        }
 
         #playpause {
             bottom: calc(var(--size) * .5);
@@ -158,8 +128,11 @@
             transition: width 300ms ease-in-out;
             overflow-x: hidden;
 
-            &:hover {
+            @include Mixins.hover {
                 width: calc(var(--size) * 9);
+            }
+            @include Mixins.mobile {
+                width: calc(var(--size) * 1.5) !important;
             }
 
             #volume__toggler {
@@ -167,7 +140,7 @@
                 position: relative;
                 height: calc(var(--size) * 1.5);
                 width: calc(var(--size) * 1.5);
-                &:hover {
+                @include Mixins.hover {
                     background-color: transparent;
                 }
             }
@@ -181,11 +154,13 @@
             left: calc(var(--size) * .5);
 
             .timestamp {
-                width: calc(var(--size) * 3);
+                width: calc(var(--size) * 3.6);
                 font-size: var(--size);
-                display: grid;
-                place-content: center;
+                display: flex;
+                align-items: center;
                 height: calc(var(--size) * 1.5);
+                &.current-time { flex-direction: row-reverse; }
+                &.remaining-time { text-align: left; }
             }
         }
         .prevent-controls-missclick {

@@ -1,24 +1,37 @@
+@use "../mixins" as Mixins;
+
 .input {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     height: 100%;
-    gap: .5rem;
-    font-size: 1.5em;
+    gap: .5em;
+    font-size: min(8vw, 8dvh, 8vh);
 
-    @include Mixins.mobile {
-        font-size: 1.25em;
-    }
+    @include Mixins.screen-width(360px) { font-size: 1.125em; }
+    @include Mixins.screen-width(480px) { font-size: 1.25em; }
+    @include Mixins.screen-width(720px) { font-size: 1.5em; }
+    @include Mixins.screen-width(1280px) { font-size: 1.75em; }
+    @include Mixins.screen-width(1560px) { font-size: 2em; }
+    @include Mixins.screen-width(2160px) { font-size: 2.25em; }
+    @include Mixins.mobile { font-size: 1.25em; }
 
     label {
         display: flex;
         flex-direction: row;
         align-items: center;
         justify-content: center;
-        padding: 1.5rem;
-        border: .125rem dashed currentColor;
-        border-radius: 1rem;
+        padding: 1.5em;
+        border: .125em dashed currentColor;
+        border-radius: 1em;
+    }
+
+    &__codec-warning {
+        position: relative;
+        margin-bottom: 1em;
+        font-size: .75em;
+        text-align: center;
     }
 
     .show-button {

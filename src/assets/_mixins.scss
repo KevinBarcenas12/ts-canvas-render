@@ -1,23 +1,37 @@
 @mixin screen-width($size: 360px) {
-    @media (min-width: $size) {
+    @media only screen and (min-width: $size) {
         @content;
     }
 }
 
 @mixin screen-height($size: 480px) {
-    @media (min-height: $size) {
+    @media only screen and (min-height: $size) {
         @content;
     }
 }
 
 @mixin mobile {
-    @media (hover: none) {
+    @media only screen and (hover: none) {
+        @content;
+    }
+}
+
+@mixin desktop {
+    @media only screen and (any-hover) {
         @content;
     }
 }
 
 @mixin mobile-oriented($direction: portrait) {
-    @media (hover: none) and (orientation: $direction) {
+    @media only screen and (hover: none) and (orientation: $direction) {
         @content;
+    }
+}
+
+@mixin hover {
+    @media only screen and (any-hover) {
+        &:hover {
+            @content;
+        }
     }
 }

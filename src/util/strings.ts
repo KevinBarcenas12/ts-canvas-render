@@ -2,6 +2,24 @@ export function trimExtension(string: string) {
     return string.replace(/\.[^/.]+$/, "");
 }
 
+export function getExtension(string: string) {
+    return string.split(".").pop() || "";
+}
+
+type VideoType = ".mp4" | ".webm" | ".ogg" | ".mov";
+type CodecType = "QuickTime" | "WebM" | "Ogg" | "MP4" | null;
+const VIDEO_EXTENSIONS: [VideoType, CodecType][] = [
+    [".mp4", "MP4"],
+    [".webm", "WebM"],
+    [".ogg", "Ogg"],
+    // [".mov", "QuickTime"],
+];
+
+export function isValidVideoExtension(string: string): [ boolean, CodecType ] {
+    for (let ext of VIDEO_EXTENSIONS) if (string.endsWith(ext[0])) return [true, ext[1]];
+    return [false, null];
+}
+
 export function capitalize(string: string) {
     if (string.length < 1) return "";
     return string.charAt(0).toUpperCase() + string.slice(1);
@@ -24,7 +42,7 @@ export function setSpaces(string: string) {
     if (string.includes(".")) string = string.replace(/\./g, " ");
     
     string = string.replace(/@sep@/g, " - ");
-    string = string.replace(/ - /g, match => ` - ${match.charAt(3).toUpperCase()}`);
+    string = string.replace(/ - (.)/g, match => ` - ${match.charAt(3).toUpperCase()}`);
 
     return string;
 }
@@ -167,6 +185,8 @@ export function concat(inputs: string[], separator: string) {
 
 const String = {
     trimExtension,
+    getExtension,
+    isValidVideoExtension,
     capitalize,
     capitalizeAll,
     concat,

@@ -1,3 +1,5 @@
+@use "./mixins" as Mixins;
+
 .icon {
     color: currentColor;
     stroke: currentColor;
@@ -15,4 +17,109 @@
     vertical-align: middle;
     max-width: 100%;
     max-height: 100%;
+    filter: drop-shadow(getSize(.1) getSize(.1) getSize(.1) hsl(0 0% 0% / .25));
+    position: absolute;
+    font-size: calc(var(--size) * 1.5);
+    border-radius: calc(var(--size) * .5);
+    padding: calc(var(--size) * .05);
+    z-index: 2;
+
+    &:hover {
+        background-color: hsl(0 100% 100% / .125);
+    }
+
+    .icon { display: block; }
+    .track {
+        &.disabled { --current: var(--hsl-track-disabled); }
+        position: relative;
+        display: block;
+        color: var(--current);
+        margin-inline: calc(var(--size) * .5);
+        flex-grow: 1;
+        flex-shrink: 0;
+        min-width: calc(var(--size) * 3);
+        cursor: pointer;
+        appearance: none;
+        -moz-appearance: none;
+        -webkit-appearance: none;
+        -ms-progress-appearance: none;
+
+        .track__progress {
+            position: absolute;
+            left: 0;
+            width: calc((var(--width, 0) * 1%));
+            height: calc(var(--size) * .5);
+            top: calc(var(--size) * .5); 
+            background-color: currentColor;
+            border-radius: calc(var(--size) * .5);
+            z-index: 2;
+        }
+        .track__total {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: calc(var(--size) * .5);
+            top: calc(var(--size) * .5);
+            background-color: currentColor;
+            opacity: .25;
+            border-radius: calc(var(--size) * .5);
+            transition: width 400ms ease;
+            z-index: 1;
+        }
+        .track__input {
+
+            @mixin thumb {
+                outline: none;
+                border: none;
+                appearance: none;
+                -moz-appearance: none;
+                -webkit-appearance: none;
+                -ms-progress-appearance: none;
+                --s: calc(var(--size) * .8);
+                width: var(--s);
+                height: var(--s);
+                top: calc(50% - (var(--s) / 2));
+                border-radius: 100%;
+                transform: scale(.9);
+                cursor: pointer;
+                background-color: currentColor;
+                transition: transform .2s ease-in-out, background-color .2s ease-in-out;
+            }
+
+            background-color: transparent;
+            height: 100%;
+            width: calc(100% + (var(--size) / 2));
+            position: absolute;
+            left: calc(var(--size) / 3 * -1);
+            z-index: 3;
+            cursor: pointer;
+            color: var(--current);
+
+            &::-webkit-slider-thumb {
+                @include thumb();
+            }
+            &::-moz-range-thumb {
+                @include thumb();
+            }
+            &::-ms-thumb {
+                @include thumb();
+            }
+        }
+    }
+}
+
+[role="slider"] {
+    display: flex;
+    flex-direction: row;
+    font-size: calc(var(--size) * 1.25);
+    cursor: default;
+    filter: drop-shadow(.1rem .1rem .2rem hsl(var(--hsl-bg-alt) / .25));
+}
+[role="toggler"] {
+    display: inline;
+    cursor: pointer;
+    aspect-ratio: 1/1;
+}
+[role="text"] {
+    display: block;
 }
