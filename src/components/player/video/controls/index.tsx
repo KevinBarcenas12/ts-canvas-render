@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useId, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion"
 import Fullscreen from "./fullscreen"
@@ -6,10 +5,11 @@ import TogglePause from "./playpause"
 import Volume from "./volume"
 import Exit from "./exit";
 import TimeBar from "./timebar";
-import mob from "util/mobile";
+import _isMobile from "util/mobile";
 import { useVideoContext } from "components/player/context";
 import String from "util/strings";
 import MediaControl from "./components/mediaControl";
+import type { Timer } from "util/global";
 
 export default function Controls() {
     // Context
@@ -20,10 +20,10 @@ export default function Controls() {
     const [duration] = useVideoContext("videoDuration");
     // Component states
     const [visibleControls, setVisibleControls] = useState(true);
-    const [, setHideTimeout] = useState<any>(null);
+    const [, setHideTimeout] = useState<Timer>(null);
     const [movedTime, setMovedTime] = useState(0);
     const [showMovedTime, setShowMovedTime] = useState(false);
-    const [, setMovedCleanUp] = useState<any>(null);
+    const [, setMovedCleanUp] = useState<Timer>(null);
 
     useEffect(() => {
         if (paused) setVisibleControls(true);
@@ -34,7 +34,7 @@ export default function Controls() {
     }, [paused]);
 
     // Constant variables
-    const isMobile = mob();
+    const isMobile = _isMobile();
     const Timeout = {
         iddleClick: 300,
         hideControls: 2000,
@@ -51,9 +51,7 @@ export default function Controls() {
     // Desktop movement handler
     const mouseMove = () => {
         if (isMobile) return;
-
         setVisibleControls(true);
-
         setHideTimeout(clearInterval);
         const fn = () => setVisibleControls(false);
         if (!paused) setHideTimeout(setTimeout(fn, Timeout.hideControls));
@@ -61,24 +59,25 @@ export default function Controls() {
 
     // Global click handler
     const [globalClickCount, setGlobalClickCount] = useState(0);
+    const [timeWhenUpdated, setTimeWhenUpdated] = useState(currentTime);
     const [lClickCount, setLClickCount] = useState(0);
     const [rClickCount, setRClickCount] = useState(0);
     const [lClickCountDisplay, setLClickCountDisplay] = useState(lClickCount);
     const [rClickCountDisplay, setRClickCountDisplay] = useState(rClickCount);
     const [reseting, setReseting] = useState(false);
-    const [, setGlobalReset] = useState<any>(null);
+    const [, setGlobalReset] = useState<Timer>(null);
 
     const [isDisplaying, setDisplaying] = useState(false);
-    const [, setDisplayClickTimeout] = useState<any>(null);
+    const [, setDisplayClickTimeout] = useState<Timer>(null);
 
     // Handle click total count
     useEffect(() => {
         if (!reseting || globalClickCount === 0) return;
         setReseting(false);
-
         setGlobalReset(clearTimeout);
         setGlobalClickCount(0);
         setDisplayClickTimeout(clearTimeout);
+        setTimeWhenUpdated(currentTime);
         if (globalClickCount > 1) {
             setShowMovedTime(true);
             setMovedCleanUp(clearTimeout);
@@ -89,7 +88,6 @@ export default function Controls() {
             setLClickCount(0);
             setRClickCount(0);
         }, Timeout.hideCounter));
-
         if (globalClickCount === 1) {
             if (isMobile) {
                 setVisibleControls(prev => !prev);
@@ -106,40 +104,40 @@ export default function Controls() {
             if (paused) setHideTimeout(setTimeout(fn, Timeout.hideControls));
             return;
         }
-
         if (globalClickCount === 2 && !isMobile) {
             setFullscreen(prev => !prev);
             return;
         }
-
         setCurrentTime(_ => {
             const bwTime = lClickCount > 0 ? (lClickCount - 1) * 10 : 0;
             const fwTime = rClickCount > 0 ? (rClickCount - 1) * 10 : 0;
-            const newTime = currentTime + (fwTime - bwTime);
-            setMovedTime(fwTime - bwTime);
+            const moved = fwTime - bwTime
+            const newTime = currentTime + moved;
+            setMovedTime(_ => {
+                if (moved < 0 && currentTime + moved < 0) return parseInt(`${-currentTime}`);
+                else if (moved > 0 && currentTime + moved > duration) return parseInt(`${duration}`);
+                return moved;
+            });
             if (newTime > duration) return duration;
             if (newTime < 0) return 0;
             return newTime;
         });
-    }, [reseting]);
+    }, [reseting]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Handle click count timeout to reset
     useEffect(() => {
         if (globalClickCount === 0) return;
-
         if (globalClickCount === 2 && !isMobile) {
             setGlobalReset(clearTimeout);
             setReseting(true);
             return;
         }
-
         if (globalClickCount >= 2) {
             setDisplaying(true);
         }
-
         setGlobalReset(clearTimeout);
         setGlobalReset(setTimeout(() => setReseting(true), Timeout.iddleClick));
-    }, [globalClickCount]);
+    }, [globalClickCount]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         if (globalClickCount === 0) {
@@ -149,7 +147,7 @@ export default function Controls() {
         setLClickCountDisplay(lClickCount);
         setRClickCountDisplay(rClickCount);
         setDisplaying(true);
-    }, [lClickCount, rClickCount]);
+    }, [lClickCount, rClickCount]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const ref = {
         main: useRef<HTMLDivElement>(null),
@@ -157,9 +155,17 @@ export default function Controls() {
         right: useRef<HTMLDivElement>(null),
     };
 
+    const getTimeToDisplay = (times: number, left = false, currentTime = timeWhenUpdated) => {
+        if (times < 2) return 0;
+        let time = --times * 10;
+        if (left && currentTime - time < 0) return parseInt(`${currentTime}`);
+        if (!left && currentTime + time > duration) return parseInt(`${duration}`);
+        return time;
+    };
+
     const TimeToDisplay = {
-        left: lClickCountDisplay > 0 ? (lClickCountDisplay - 1) * 10 : 0,
-        right: rClickCountDisplay > 0 ? (rClickCountDisplay - 1) * 10 : 0,
+        left: -getTimeToDisplay(lClickCountDisplay, true),
+        right: getTimeToDisplay(rClickCountDisplay),
     };
 
     return <motion.div
@@ -182,7 +188,7 @@ export default function Controls() {
                 key="left-time"
                 variant="left-time"
             >
-                {String.getTimeExtended(-TimeToDisplay.left)}
+                {String.getTimeExtended(TimeToDisplay.left)}
             </MediaControl>
             <MediaControl
                 animationDirection="x"
@@ -202,13 +208,13 @@ export default function Controls() {
             >
                 {movedTime > 0 ? "Forward" : "Backward"} {String.getTimeExtended(movedTime)}
             </MediaControl>
-            {(visibleControls && isMobile) && <motion.div
+            {(isMobile) && <motion.div
                 className="click-handler left"
                 ref={ref.left}
                 onClick={() => setLClickCount(prev => prev + 1)}
                 key="left-click-handle"
             />}
-            {(visibleControls && isMobile) && <motion.div
+            {(isMobile) && <motion.div
                 className="click-handler right"
                 ref={ref.right}
                 onClick={() => setRClickCount(prev => prev + 1)}

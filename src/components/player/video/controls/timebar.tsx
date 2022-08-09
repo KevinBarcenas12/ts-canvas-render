@@ -18,7 +18,7 @@ export default function TimeBar({ isVisible = false }) {
 
     useEffect(() => {
         setNewCurrentTime(input);
-    }, [deferedTime]);
+    }, [deferedTime]); // eslint-disable-line react-hooks/exhaustive-deps
 
     return <MediaControl 
         isVisible={isVisible} 

@@ -3,6 +3,7 @@ import { useFiles } from "context";
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { useVideoContext } from "../context";
+import type { Timer } from "util/global";
 
 export default function Canvas() {
     const [currentTime, setCurrentTime] = useVideoContext("videoCurrentTime");
@@ -17,14 +18,14 @@ export default function Canvas() {
     const [{index, ...files}] = useFiles();
     
     const [video, setVideo] = useState(document.createElement("video"));
-    const [, setRenderInterval] = useState<any>(null);
+    const [, setRenderInterval] = useState<Timer>(null);
     const canvas = useRef<HTMLCanvasElement>(null);
     
     const FPS = 1000 / refreshRate;
 
     const drawInCanvas = (image: HTMLVideoElement = video) => {
         if (!canvas.current) return;
-        const ctx = canvas.current.getContext("2d", { colorSpace: "srgb" });
+        const ctx = canvas.current.getContext("2d");
         if (!ctx) return;
         ctx.drawImage(image, 0, 0, canvas.current.width, canvas.current.height);
     };
@@ -46,8 +47,8 @@ export default function Canvas() {
                 const current = canvas.current;
                 current.width = newVideo.videoWidth;
                 current.height = newVideo.videoHeight;
-                current.style.setProperty('--width', `${newVideo.videoWidth}`);
-                current.style.setProperty('--height', `${newVideo.videoHeight}`);
+                document.body.style.setProperty('--videoWidth', `${newVideo.videoWidth}`);
+                document.body.style.setProperty('--videoHeight', `${newVideo.videoHeight}`);
             }
             newVideo.onloadeddata = () => drawInCanvas(newVideo);
             return newVideo;

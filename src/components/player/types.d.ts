@@ -11,6 +11,11 @@ export type ContextUpdater<T> = React.Context<Action<T>>;
 
 type RefreshRates = 24 | 29.97 | 30 | 48 | 59.9 | 60;
 
+export type Dimensions = {
+    width: number;
+    height: number;
+}
+
 export interface ContextList {
     // Time
     videoCurrentTime: number;
@@ -26,4 +31,6 @@ export interface ContextList {
     videoFullscreen: boolean;
     // Refresh rate
     refreshRate: RefreshRates;
+    // Dimensions
+    videoDimensions: Dimensions;
 };

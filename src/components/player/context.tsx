@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import type {
     Action,
     ProviderObj,
@@ -8,6 +8,7 @@ import type {
     RefreshRates,
     Context,
     ContextUpdater,
+    Dimensions,
 } from "./types";
 
 const CurrentTime           = createContext<number>(0);
@@ -40,6 +41,9 @@ const VideoFullscreenUpdater= createContext<Action<boolean>>(() => {});
 const VideoRefreshRate      = createContext<RefreshRates>(24);
 const VideoRefreshRateUpdater= createContext<Action<RefreshRates>>(() => {});
 
+const VideoDimensions = createContext<Dimensions>({ width: 0, height: 0 });
+const VideoDimensionsUpdater = createContext<Action<Dimensions>>(() => {});
+
 const Provider: ProviderObj = {
     videoCurrentTime: CurrentTime,
     newCurrentTime: NewCurrentTime,
@@ -51,6 +55,7 @@ const Provider: ProviderObj = {
     videoLoop: VideoLoop,
     videoFullscreen: VideoFullscreen,
     refreshRate: VideoRefreshRate,
+    videoDimensions: VideoDimensions,
 };
 const Updater: UpdaterObj = {
     videoCurrentTime: CurrentTimeUpdater,
@@ -63,6 +68,7 @@ const Updater: UpdaterObj = {
     videoLoop: VideoLoopUpdater,
     videoFullscreen: VideoFullscreenUpdater,
     refreshRate: VideoRefreshRateUpdater,
+    videoDimensions: VideoDimensionsUpdater,
 };
 
 export function useVideoContext<T extends keyof ContextList>(key: T): useContextHook<ContextList[T]> {
@@ -89,7 +95,7 @@ function ContextProvider<Key extends keyof ContextList>({ hook, Upd, Val, childr
 
 function ContextElement({ element, children }: { element: any, children: React.ReactNode }): JSX.Element {
     const length = Object.keys(element).length;
-    if (element == null) return <></>;
+    if (element == null) return <>{children}</>;
 
     for (let key in element) {
         const { [key]: current, ...rest } = element;
@@ -107,17 +113,33 @@ function ContextElement({ element, children }: { element: any, children: React.R
 }
 
 export function VideoContext({ children }: { children: React.ReactNode }): JSX.Element {
+    localStorage.setItem("refreshRate", JSON.stringify({ refreshRate: 24 }));
+
+    localStorage.getItem("volume") == null && localStorage.setItem("volume", JSON.stringify({ volume: 1, muted: false }));
+    localStorage.getItem("refreshRate") == null && localStorage.setItem("refreshRate", JSON.stringify({ refreshRate: 24 }));
+
+    const local_volume = JSON.parse(localStorage.getItem("volume") as string) || { volume: 1, muted: false };
+    const local_refreshRate = JSON.parse(localStorage.getItem("refreshRate") as string) || { refreshRate: 24 };
+
+    let [volume, setVolume] = useState(local_volume.volume as number);
+    let [refreshRate, setRefreshRate] = useState(local_refreshRate.refresRate as RefreshRates);
+    let [muted, setMuted] = useState(false);
+
+    useEffect(() => { localStorage.setItem("volume", JSON.stringify({ volume, muted })) }, [volume, muted]);
+    useEffect(() => { localStorage.setItem("refreshRate", JSON.stringify({ refreshRate })) }, [refreshRate]);
+
     const props = {
         currentTime: [useState(0), CurrentTime, CurrentTimeUpdater],
         newCurrentTime: [useState(0), NewCurrentTime, NewCurrentTimeUpdater],
         movedTime: [useState(0), MovedTime, MovedTimeUpdater],
-        videoVolume: [useState(1), VideoVolume, VideoVolumeUpdater],
+        videoVolume: [[volume, setVolume], VideoVolume, VideoVolumeUpdater],
         videoDuration: [useState(0), VideoDuration, VideoDurationUpdater],
         videoPaused: [useState(true), VideoPaused, VideoPausedUpdater],
-        videoMuted: [useState(false), VideoMuted, VideoMutedUpdater],
+        videoMuted: [[muted, setMuted], VideoMuted, VideoMutedUpdater],
         videoLoop: [useState(false), VideoLoop, VideoLoopUpdater],
         videoFullscreen: [useState(false), VideoFullscreen, VideoFullscreenUpdater],
-        refreshRate: [useState<RefreshRates>(24), VideoRefreshRate, VideoRefreshRateUpdater],
+        refreshRate: [[refreshRate, setRefreshRate], VideoRefreshRate, VideoRefreshRateUpdater],
+        videoDimensions: [useState<Dimensions>({ width: 0, height: 0 }), VideoDimensions, VideoDimensionsUpdater],
     };
 
     return <ContextElement element={props}>{children}</ContextElement>

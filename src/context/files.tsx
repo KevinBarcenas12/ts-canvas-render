@@ -1,23 +1,24 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import type { ContextHook, Action, FileObject } from "./types";
-type CurrentContext = {
+import type { ContextHook, Action } from "./types";
+import type { FileObject } from "util/global";
+
+type Files = {
     index: number;
     list: FileObject[];
     isValidFiles(): boolean;
     getValidFiles: () => FileObject[];
 };
-
-const Default: CurrentContext = {
+const Default: Files = {
     index: 0,
     list: [],
     isValidFiles: () => false,
     getValidFiles: () => [],
 };
 
-const ContextProvider = createContext<CurrentContext>(Default);
-const ContextUpdater = createContext<Action<CurrentContext>>(() => ({ index: 0, files: [] }));
+const ContextProvider = createContext<Files>(Default);
+const ContextUpdater = createContext<Action<Files>>(() => ({ index: 0, files: [] }));
 
-export function useFiles(): ContextHook<CurrentContext> {
+export function useFiles(): ContextHook<Files> {
     return [
         useContext(ContextProvider),
         useContext(ContextUpdater),
@@ -25,7 +26,7 @@ export function useFiles(): ContextHook<CurrentContext> {
 }
 
 export default function FilesProvider({ children }: { children: React.ReactNode }): JSX.Element {
-    const [files, setFiles] = useState<CurrentContext>(Default);
+    const [files, setFiles] = useState<Files>(Default);
 
     useEffect(() => {
         files.list.forEach(file => {

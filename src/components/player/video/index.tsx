@@ -37,8 +37,7 @@ function VideoComponent() {
             window.removeEventListener("MSFullscreenChange", measureFullscreen);
             window.removeEventListener("msfullscreenchange", measureFullscreen);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     return <motion.div className="video__player" ref={ref}>
         <Canvas />
