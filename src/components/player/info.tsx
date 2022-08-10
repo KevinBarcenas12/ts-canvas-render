@@ -1,15 +1,17 @@
-import Line from "components/animated/line";
-import { useFiles } from "context";
-import String from "util/strings";
-import Expandable from "./components/expandable";
+import Line from 'components/animated/line';
+import { useFiles } from 'context';
+import String from 'util/strings';
+import Expandable from './components/expandable';
 
 export default function Info() {
     const [{ index, list }] = useFiles();
     const { name, size, codec } = list[index];
-    return <Expandable variant="info" id="video-info" title={String.getTitle(name)}>
-        <Line>File name: {name}</Line>
-        <Line>File title: {String.getTitle(name)}</Line>
-        <Line>File size: {String.getSize(size)}</Line>
-        <Line>Video Codec: {codec}</Line>
-    </Expandable>;
+    return (
+        <Expandable variant="info" id="video-info" title={String.getTitle(name)}>
+            <Line>File name: {name}</Line>
+            <Line>File title: {String.getTitle(name)}</Line>
+            <Line>File size: {String.getSize(size)}</Line>
+            <Line>Video Codec: {codec}</Line>
+        </Expandable>
+    );
 }

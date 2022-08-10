@@ -1,6 +1,6 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import type { ContextHook, Action } from "./types";
-import type { FileObject } from "util/global";
+import { createContext, useContext, useEffect, useState } from 'react';
+import type { FileObject } from 'util/global';
+import type { ContextHook, Action } from './types';
 
 type Files = {
     index: number;

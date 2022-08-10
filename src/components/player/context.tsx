@@ -1,4 +1,7 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+/* eslint-disable react/jsx-no-useless-fragment */
+/* eslint-disable @typescript-eslint/no-empty-function */
+/* eslint-disable no-multi-spaces */
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import type {
     Action,
     ProviderObj,
@@ -7,39 +10,39 @@ import type {
     useContextHook,
     RefreshRates,
     Context,
-    ContextUpdater,
     Dimensions,
-} from "./types";
+    useStateHook,
+} from './types';
 
-const CurrentTime           = createContext<number>(0);
-const CurrentTimeUpdater    = createContext<Action<number>>(() => {});
+const CurrentTime               = createContext<number>(0);
+const CurrentTimeUpdater        = createContext<Action<number>>(() => {});
 
-const NewCurrentTime        = createContext<number>(0);
-const NewCurrentTimeUpdater = createContext<Action<number>>(() => {});
+const NewCurrentTime            = createContext<number>(0);
+const NewCurrentTimeUpdater     = createContext<Action<number>>(() => {});
 
-const MovedTime             = createContext<number>(0);
-const MovedTimeUpdater      = createContext<Action<number>>(() => {});
+const MovedTime                 = createContext<number>(0);
+const MovedTimeUpdater          = createContext<Action<number>>(() => {});
 
-const VideoVolume           = createContext<number>(1);
-const VideoVolumeUpdater    = createContext<Action<number>>(() => {});
+const VideoVolume               = createContext<number>(1);
+const VideoVolumeUpdater        = createContext<Action<number>>(() => {});
 
-const VideoDuration         = createContext<number>(0);
-const VideoDurationUpdater  = createContext<Action<number>>(() => {});
+const VideoDuration             = createContext<number>(0);
+const VideoDurationUpdater      = createContext<Action<number>>(() => {});
 
-const VideoPaused           = createContext<boolean>(true);
-const VideoPausedUpdater    = createContext<Action<boolean>>(() => {});
+const VideoPaused               = createContext<boolean>(true);
+const VideoPausedUpdater        = createContext<Action<boolean>>(() => {});
 
-const VideoMuted            = createContext<boolean>(false);
-const VideoMutedUpdater     = createContext<Action<boolean>>(() => {});
+const VideoMuted                = createContext<boolean>(false);
+const VideoMutedUpdater         = createContext<Action<boolean>>(() => {});
 
-const VideoLoop             = createContext<boolean>(false);
-const VideoLoopUpdater      = createContext<Action<boolean>>(() => {});
+const VideoLoop                 = createContext<boolean>(false);
+const VideoLoopUpdater          = createContext<Action<boolean>>(() => {});
 
-const VideoFullscreen       = createContext<boolean>(false);
-const VideoFullscreenUpdater= createContext<Action<boolean>>(() => {});
+const VideoFullscreen           = createContext<boolean>(false);
+const VideoFullscreenUpdater    = createContext<Action<boolean>>(() => {});
 
-const VideoRefreshRate      = createContext<RefreshRates>(24);
-const VideoRefreshRateUpdater= createContext<Action<RefreshRates>>(() => {});
+const VideoRefreshRate          = createContext<RefreshRates>(24);
+const VideoRefreshRateUpdater   = createContext<Action<RefreshRates>>(() => {});
 
 const VideoDimensions = createContext<Dimensions>({ width: 0, height: 0 });
 const VideoDimensionsUpdater = createContext<Action<Dimensions>>(() => {});
@@ -71,76 +74,97 @@ const Updater: UpdaterObj = {
     videoDimensions: VideoDimensionsUpdater,
 };
 
-export function useVideoContext<T extends keyof ContextList>(key: T): useContextHook<ContextList[T]> {
+type useVideoContext<T extends keyof ContextList> = useContextHook<ContextList[T]>;
+export function useVideoContext<T extends keyof ContextList>(key: T): useVideoContext<T> {
     return [
         useContext(Provider[key]),
         useContext(Updater[key]),
+    ];
+}
+
+interface ContextProviderProps<T extends keyof ContextList> {
+    Hook: useStateHook<ContextList[T]>;
+    Value: Context<ContextList[T]>;
+    Updater: Context<Action<ContextList[T]>>;
+    children: React.ReactNode;
+    key: T;
+}
+function ContextProvider<T extends keyof ContextList>({
+    Hook: [value, setter], Updater,
+    Value, children, key,
+}: ContextProviderProps<T>) {
+    return (
+        <Updater.Provider value={setter} key={key}>
+            <Value.Provider value={value}>
+                {children}
+            </Value.Provider>
+        </Updater.Provider>
+    );
+}
+
+type ContextObject = {
+    [key in keyof ContextList]: [
+        useStateHook<ContextList[key]>,
+        Context<ContextList[key]>,
+        Context<Action<ContextList[key]>>
     ]
 }
-
-type ContextProviderProps<T> = {
-    hook: useContextHook<T>;
-    Upd: ContextUpdater<T>;
-    Val: Context<T>;
+interface ContextProps<T = void> {
+    element: Partial<ContextObject>;
     children: React.ReactNode;
-};
-function ContextProvider<Key extends keyof ContextList>({ hook, Upd, Val, children }: ContextProviderProps<ContextList[Key]>) {
-    const [ value, setter ] = hook;
-    return <Val.Provider value={value}>
-        <Upd.Provider value={setter}>
-            {children}
-        </Upd.Provider>
-    </Val.Provider>
+    key: T;
 }
-
-function ContextElement({ element, children }: { element: any, children: React.ReactNode }): JSX.Element {
-    const length = Object.keys(element).length;
-    if (element == null) return <>{children}</>;
-
-    for (let key in element) {
-        const { [key]: current, ...rest } = element;
-        if (current == null) return <></>;
-        const [ hook, value, updater ] = current;
-        return <ContextProvider
-            Upd={updater}
-            Val={value}
-            hook={hook}
-        >
-            {length > 1 ? <ContextElement element={rest}>{children}</ContextElement> : children}
-        </ContextProvider>
-    }
-    return <></>
+function ContextElement<T extends keyof ContextList>({ element, children, key }: ContextProps<T>) {
+    key = Object.keys(element)[0] as T;
+    const { [key]: current, ...rest } = element;
+    if (current == null) return (<>{children}</>);
+    const [ Hook, Value, Updater ] = current;
+    return (
+        Object.keys(rest).length > 0 ? (
+            <ContextProvider
+                key={key}
+                Hook={Hook}
+                Updater={Updater}
+                Value={Value}
+            >
+                {children}
+            </ContextProvider>
+        ) : (<>{children}</>)
+    );
 }
 
 export function VideoContext({ children }: { children: React.ReactNode }): JSX.Element {
-    localStorage.setItem("refreshRate", JSON.stringify({ refreshRate: 24 }));
+    if (localStorage.getItem('volume') == null) {
+        localStorage.setItem('volume', JSON.stringify({ volume: 1, muted: false }));
+    }
+    if (localStorage.getItem('refreshRate') == null) {
+        localStorage.setItem('refreshRate', JSON.stringify({ refreshRate: 24 }));
+    }
 
-    localStorage.getItem("volume") == null && localStorage.setItem("volume", JSON.stringify({ volume: 1, muted: false }));
-    localStorage.getItem("refreshRate") == null && localStorage.setItem("refreshRate", JSON.stringify({ refreshRate: 24 }));
+    const LOCAL_VOLUME = JSON.parse(localStorage.getItem('volume') as string) || { volume: 1, muted: false };
+    const LOCAL_REFRESHRATE = JSON.parse(localStorage.getItem('refreshRate') as string) || { refreshRate: 24 };
 
-    const local_volume = JSON.parse(localStorage.getItem("volume") as string) || { volume: 1, muted: false };
-    const local_refreshRate = JSON.parse(localStorage.getItem("refreshRate") as string) || { refreshRate: 24 };
+    const [volume, setVolume] = useState(LOCAL_VOLUME.volume as number);
+    const [refreshRate, setRefreshRate] = useState(LOCAL_REFRESHRATE.refresRate as RefreshRates);
+    const [muted, setMuted] = useState(false);
+    const [dimensions, setDimensions] = useState<Dimensions>({ width: 0, height: 0 });
 
-    let [volume, setVolume] = useState(local_volume.volume as number);
-    let [refreshRate, setRefreshRate] = useState(local_refreshRate.refresRate as RefreshRates);
-    let [muted, setMuted] = useState(false);
+    useEffect(() => { localStorage.setItem('volume', JSON.stringify({ volume, muted })); }, [volume, muted]);
+    useEffect(() => { localStorage.setItem('refreshRate', JSON.stringify({ refreshRate })); }, [refreshRate]);
 
-    useEffect(() => { localStorage.setItem("volume", JSON.stringify({ volume, muted })) }, [volume, muted]);
-    useEffect(() => { localStorage.setItem("refreshRate", JSON.stringify({ refreshRate })) }, [refreshRate]);
-
-    const props = {
-        currentTime: [useState(0), CurrentTime, CurrentTimeUpdater],
+    const props: ContextProps['element'] = {
+        videoCurrentTime: [useState(0), CurrentTime, CurrentTimeUpdater],
         newCurrentTime: [useState(0), NewCurrentTime, NewCurrentTimeUpdater],
         movedTime: [useState(0), MovedTime, MovedTimeUpdater],
         videoVolume: [[volume, setVolume], VideoVolume, VideoVolumeUpdater],
         videoDuration: [useState(0), VideoDuration, VideoDurationUpdater],
-        videoPaused: [useState(true), VideoPaused, VideoPausedUpdater],
+        videoPaused: [useState<boolean>(true), VideoPaused, VideoPausedUpdater],
         videoMuted: [[muted, setMuted], VideoMuted, VideoMutedUpdater],
-        videoLoop: [useState(false), VideoLoop, VideoLoopUpdater],
-        videoFullscreen: [useState(false), VideoFullscreen, VideoFullscreenUpdater],
+        videoLoop: [useState<boolean>(false), VideoLoop, VideoLoopUpdater],
+        videoFullscreen: [useState<boolean>(false), VideoFullscreen, VideoFullscreenUpdater],
         refreshRate: [[refreshRate, setRefreshRate], VideoRefreshRate, VideoRefreshRateUpdater],
-        videoDimensions: [useState<Dimensions>({ width: 0, height: 0 }), VideoDimensions, VideoDimensionsUpdater],
+        videoDimensions: [[dimensions, setDimensions], VideoDimensions, VideoDimensionsUpdater],
     };
 
-    return <ContextElement element={props}>{children}</ContextElement>
+    return <ContextElement element={props} key={null as any}>{children}</ContextElement>;
 }

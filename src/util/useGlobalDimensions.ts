@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 
 export default function useGlobalDimensions() {
     const [dimensions, setDimensions] = useState({
         width: window.innerWidth,
         height: window.innerHeight
     });
-    
+
     useEffect(() => {
         const handleResize = () => {
             setDimensions({
@@ -18,8 +18,8 @@ export default function useGlobalDimensions() {
         return () => {
             window.removeEventListener('resize', handleResize);
             window.removeEventListener('orientationchange', handleResize);
-        }
+        };
     }, []);
-    
+
     return dimensions;
 }

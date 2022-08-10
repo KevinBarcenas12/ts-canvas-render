@@ -1,23 +1,23 @@
-import { useState, useId, useEffect, useRef } from "react";
-import { AnimatePresence, motion } from "framer-motion"
-import Fullscreen from "./fullscreen"
-import TogglePause from "./playpause"
-import Volume from "./volume"
-import Exit from "./exit";
-import TimeBar from "./timebar";
-import _isMobile from "util/mobile";
-import { useVideoContext } from "components/player/context";
-import String from "util/strings";
-import MediaControl from "./components/mediaControl";
-import type { Timer } from "util/global";
+import { useState, useId, useEffect, useRef } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import _isMobile from 'util/mobile';
+import { useVideoContext } from 'components/player/context';
+import String from 'util/strings';
+import type { Timer } from 'util/global';
+import Fullscreen from './fullscreen';
+import TogglePause from './playpause';
+import Volume from './volume';
+import Exit from './exit';
+import TimeBar from './timebar';
+import MediaControl from './components/mediaControl';
 
 export default function Controls() {
     // Context
-    const [paused, setPaused] = useVideoContext("videoPaused");
-    const [, setFullscreen] = useVideoContext("videoFullscreen");
-    const [, setCurrentTime] = useVideoContext("newCurrentTime");
-    const [currentTime] = useVideoContext("videoCurrentTime");
-    const [duration] = useVideoContext("videoDuration");
+    const [paused, setPaused] = useVideoContext('videoPaused');
+    const [, setFullscreen] = useVideoContext('videoFullscreen');
+    const [, setCurrentTime] = useVideoContext('newCurrentTime');
+    const [currentTime] = useVideoContext('videoCurrentTime');
+    const [duration] = useVideoContext('videoDuration');
     // Component states
     const [visibleControls, setVisibleControls] = useState(true);
     const [, setHideTimeout] = useState<Timer>(null);
@@ -93,8 +93,9 @@ export default function Controls() {
                 setVisibleControls(prev => !prev);
                 setHideTimeout(clearTimeout);
                 const fn = () => setVisibleControls(false);
-                if (paused && visibleControls)
+                if (paused && visibleControls) {
                     setHideTimeout(setTimeout(fn, Timeout.hideControls));
+                }
                 return;
             }
             setPaused(prev => !prev);
@@ -108,14 +109,14 @@ export default function Controls() {
             setFullscreen(prev => !prev);
             return;
         }
-        setCurrentTime(_ => {
+        setCurrentTime(() => {
             const bwTime = lClickCount > 0 ? (lClickCount - 1) * 10 : 0;
             const fwTime = rClickCount > 0 ? (rClickCount - 1) * 10 : 0;
-            const moved = fwTime - bwTime
+            const moved = fwTime - bwTime;
             const newTime = currentTime + moved;
-            setMovedTime(_ => {
-                if (moved < 0 && currentTime + moved < 0) return parseInt(`${-currentTime}`);
-                else if (moved > 0 && currentTime + moved > duration) return parseInt(`${duration}`);
+            setMovedTime(() => {
+                if (moved < 0 && currentTime + moved < 0) return parseInt(`${-currentTime}`, 10);
+                if (moved > 0 && currentTime + moved > duration) return parseInt(`${duration}`, 10);
                 return moved;
             });
             if (newTime > duration) return duration;
@@ -157,9 +158,9 @@ export default function Controls() {
 
     const getTimeToDisplay = (times: number, left = false, currentTime = timeWhenUpdated) => {
         if (times < 2) return 0;
-        let time = --times * 10;
-        if (left && currentTime - time < 0) return parseInt(`${currentTime}`);
-        if (!left && currentTime + time > duration) return parseInt(`${duration}`);
+        const time = --times * 10;
+        if (left && currentTime - time < 0) return parseInt(`${currentTime}`, 10);
+        if (!left && currentTime + time > duration) return parseInt(`${duration}`, 10);
         return time;
     };
 
@@ -168,68 +169,76 @@ export default function Controls() {
         right: getTimeToDisplay(rClickCountDisplay),
     };
 
-    return <motion.div
-        className="video__controls"
-        onMouseMove={mouseMove}
-        onMouseEnter={mouseMove}
-        ref={ref.main}
-        onClick={event => {
-            const eq = (a: any, b: any) => a === b.current;
-            const target = event.target;
-            if (eq(target, ref.main) || eq(target, ref.left) || eq(target, ref.right))
-                setGlobalClickCount(prev => prev + 1);
-        }}
-    >
-        <AnimatePresence>
-            <MediaControl
-                animationDirection="x"
-                isVisible={lClickCountDisplay > 1 && isDisplaying}
-                role="text"
-                key="left-time"
-                variant="left-time"
-            >
-                {String.getTimeExtended(TimeToDisplay.left)}
-            </MediaControl>
-            <MediaControl
-                animationDirection="x"
-                isVisible={rClickCountDisplay > 1 && isDisplaying}
-                role="text"
-                key="right-time"
-                variant="right-time"
-                backwards
-            >
-                {String.getTimeExtended(TimeToDisplay.right)}
-            </MediaControl>
-            <MediaControl
-                isVisible={showMovedTime}
-                role="text"
-                key="moved-time"
-                variant="moved-time"
-            >
-                {movedTime > 0 ? "Forward" : "Backward"} {String.getTimeExtended(movedTime)}
-            </MediaControl>
-            {(isMobile) && <motion.div
-                className="click-handler left"
-                ref={ref.left}
-                onClick={() => setLClickCount(prev => prev + 1)}
-                key="left-click-handle"
-            />}
-            {(isMobile) && <motion.div
-                className="click-handler right"
-                ref={ref.right}
-                onClick={() => setRClickCount(prev => prev + 1)}
-                key="right-click-handle"
-            />}
-            <motion.div
-                className="prevent-controls-missclick"
-                onClick={() => {}}
-                key="prevent-controls-missclick"
-            />
-            <TogglePause isVisible={visibleControls} key={key.togglePause} />
-            <Fullscreen isVisible={visibleControls} key={key.fullscreen} />
-            <Volume isVisible={visibleControls} key={key.volume} />
-            <Exit isVisible={visibleControls} key={key.exit} />
-            <TimeBar isVisible={visibleControls} key={key.timebar} />
-        </AnimatePresence>
-    </motion.div>
+    return (
+        <motion.div
+            className="video__controls"
+            onMouseMove={mouseMove}
+            onMouseEnter={mouseMove}
+            ref={ref.main}
+            onClick={event => {
+                const eq = (a: any, b: any) => a === b.current;
+                const { target } = event;
+                if (eq(target, ref.main) || eq(target, ref.left) || eq(target, ref.right)) {
+                    setGlobalClickCount(prev => prev + 1);
+                }
+            }}
+        >
+            <AnimatePresence>
+                <MediaControl
+                    animationDirection="x"
+                    isVisible={lClickCountDisplay > 1 && isDisplaying}
+                    role="text"
+                    key="left-time"
+                    variant="left-time"
+                >
+                    {String.getTimeExtended(TimeToDisplay.left)}
+                </MediaControl>
+                <MediaControl
+                    animationDirection="x"
+                    isVisible={rClickCountDisplay > 1 && isDisplaying}
+                    role="text"
+                    key="right-time"
+                    variant="right-time"
+                    backwards
+                >
+                    {String.getTimeExtended(TimeToDisplay.right)}
+                </MediaControl>
+                <MediaControl
+                    isVisible={showMovedTime}
+                    role="text"
+                    key="moved-time"
+                    variant="moved-time"
+                >
+                    {movedTime > 0 ? 'Forward' : 'Backward'} {String.getTimeExtended(movedTime)}
+                </MediaControl>
+                {(isMobile) && (
+                    <motion.div
+                        className="click-handler left"
+                        ref={ref.left}
+                        onClick={() => setLClickCount(prev => prev + 1)}
+                        key="left-click-handle"
+                    />
+                )}
+                {(isMobile) && (
+                    <motion.div
+                        className="click-handler right"
+                        ref={ref.right}
+                        onClick={() => setRClickCount(prev => prev + 1)}
+                        key="right-click-handle"
+                    />
+                )}
+                <motion.div
+                    className="prevent-controls-missclick"
+                    // eslint-disable-next-line @typescript-eslint/no-empty-function
+                    onClick={() => {}}
+                    key="prevent-controls-missclick"
+                />
+                <TogglePause isVisible={visibleControls} key={key.togglePause} />
+                <Fullscreen isVisible={visibleControls} key={key.fullscreen} />
+                <Volume isVisible={visibleControls} key={key.volume} />
+                <Exit isVisible={visibleControls} key={key.exit} />
+                <TimeBar isVisible={visibleControls} key={key.timebar} />
+            </AnimatePresence>
+        </motion.div>
+    );
 }

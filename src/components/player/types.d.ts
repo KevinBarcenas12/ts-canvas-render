@@ -1,20 +1,12 @@
-import type { Dispatch, SetStateAction } from "react";
-import React from "react";
-
-export type Action<T> = Dispatch<SetStateAction<T>>;
-export type useContextHook<T> = [T, Action<T>];
-export type ProviderObj = { [key in keyof ContextList]: React.Context<ContextList[key]> };
-export type UpdaterObj = { [key in keyof ContextList]: React.Context<Action<ContextList[key]>> };
-
-export type Context<T> = React.Context<T>;
-export type ContextUpdater<T> = React.Context<Action<T>>;
+import type { Dispatch, SetStateAction } from 'react';
+import React from 'react';
 
 type RefreshRates = 24 | 29.97 | 30 | 48 | 59.9 | 60;
 
 export type Dimensions = {
     width: number;
     height: number;
-}
+};
 
 export interface ContextList {
     // Time
@@ -33,4 +25,13 @@ export interface ContextList {
     refreshRate: RefreshRates;
     // Dimensions
     videoDimensions: Dimensions;
-};
+}
+
+export type Action<T> = Dispatch<SetStateAction<T>>;
+export type useContextHook<T> = [T, Action<T>];
+export type useStateHook<T> = [ T, Action<T> ];
+export type ProviderObj = { [key in keyof ContextList]: React.Context<ContextList[key]> };
+export type UpdaterObj = { [key in keyof ContextList]: React.Context<Action<ContextList[key]>> };
+
+export type Context<T> = React.Context<T>;
+export type ContextUpdater<T> = React.Context<Action<T>>;

@@ -1,6 +1,6 @@
-import ModalProvider, { useModal } from "./modal";
-import FilesProvider, { useFiles } from "./files";
-import PlayerVisibleProvider, { usePlayerVisible } from "./playerVisible";
+import ModalProvider, { useModal } from './modal';
+import FilesProvider, { useFiles } from './files';
+import PlayerVisibleProvider, { usePlayerVisible } from './playerVisible';
 
 export {
     useModal,
